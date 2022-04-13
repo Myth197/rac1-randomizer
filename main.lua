@@ -55,13 +55,17 @@ infobots = {
     {id=10, req_items={} },								-- Orxon infobot on Batalia, Commando
     {id=0xb, req_items={} },							-- Pokitaru infobot on Orxon, Clank 2
     {id=0xc, req_items={{6,0xc,0x1c, 3}} },				-- Hoven infobot on Orxon, Chase the infobot
-    {id=0xd, req_items={{0x9},{0xb},{0xd},{0xf},{0x10},{0x13},{0x17}} },	-- Gemlik infobot on Hoven, Turret Fight
-    {id=0xe, req_items={{0xc, 0x1c, 0x1a}} },			-- Oltanis infobot on Gemlik, Defeat Qwark
+    {id=0xd, req_items={{0x9},{0xb},{0xd},{0xf},{0x10},{0x13},{0x17},{0xc,2,5},{0xc,3,5}} },	-- Gemlik infobot on Hoven, Turret Fight
+    {id=0xe, req_items={{0xc, 0x1c, 0x1a,0xb},{0xc, 0x1c, 0x1a,0xd}} },			-- Oltanis infobot on Gemlik, Defeat Qwark
     {id=0xf, req_items={{0x1d}} }, 						-- Quartu infobot on Oltanis, Deaf guy
     {id=0x10, req_items={{0xc}} },    					-- KaleboIII infobot on Quartu, Giant Clank Fight
     {id=0x11, req_items={{3, 0xc, 0x1f}} },				-- Fleet infobot on Quartu, Clank's Mum
     {id=0x12, req_items={{0x1c,0x1f}} }					-- Veldin2 infobot on Drek's Fleet, Battle through the ships
 }
+
+--Gold Bolts = {
+--{id=1, location="", host_item="Gold Bolt", req_items={}}			--Gold Bolt
+--}
 
 planets = {
 	{id=1, location="Clank", host_item="Novalis", infobots={2,3}, items={0x10}},								--Veldin1
