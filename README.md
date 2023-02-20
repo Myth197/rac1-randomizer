@@ -14,17 +14,19 @@ Item tracker for EmoTracker is available, courtesy of Myth197 and DukeDragon28.
 ## Installation
 A homebrew enabled PS3 with WebMAN is required. Then use [RaCMAN](https://github.com/MichaelRelaxen/racman).  
 
-When you have RacMAN working, attach it to the game, go to "Patches loader..." in the top-left menu, then choose "Add ZIP..." and find the randomizer.zip download. Then just enable it in the mod menu.  
+When you have RacMAN working, copy the contents of rac1-randomizer-a.zip to your root RacMAN folder (where 'racman.exe' is). Then just enable it in the mod menu.
 
 You can enable the mod at any time and then start a new game, or start a new game and then enable the mod, both work just fine. If you collect any items with the mod on and you want to restart, you should disable the mod and enable it again. 
 
 ## Disabling the randomizer
 To fully disable the randomizer you need to quit the game and start it up again. The mod doesn't fully clean up after itself when it's being unloaded yet. 
 
-## Set seed
-To make a set seed, make a text file named `seed.txt` in RaCMAN's root folder (the upper folder where `racman.exe` is). The text file can contain any type of text. Newlines count as a character, meaning `oiejfoiwjef` and `oiejfoiwjef` with a new line at the end are different seeds.  
+## Randomizer settings
+To change the settings for this version of the randomizer. open 'random_settings.lua' inside your root RacMAN folder using notepad or another text editor. The 'seed' and 'graph' options replace the old seed.txt functionality. 
 
-Add `# graph: false` to the top of the `seed.txt` file to disable debug graph generation. By design, this changes the seed so a seed file with and without `# graph: false` are different, regardless of wether anything else in the file is the same. 
+The 'speedtech' option toggles whether the randomizer logic will expect glitches, exploits, or other methods unintended by Insomniac Games. You can then further customize what tech may be required using the provided categories. Note that 'skips' refers to unintended routes that are accessible via casual movement techniques.
+
+This is written very lazily, so be careful not to delete any commas (,), quotes (""), or other text in the settings file.
 
 ## What does it do?
 - Infobots and weapons/items/gadgets are randomized.

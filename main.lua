@@ -1,9 +1,40 @@
 require 'deepcopy'
 require 'io'
 require 'crc32'
-require 'logicChosen'
 
-function GetItem(name)
+require 'logicChosen'
+require 'randomlua'
+config = require 'randomizer_settings'
+-- require 'tables_id'
+require 'tables_logic'
+
+generator = lcg()
+
+Maf = {}
+function Maf:randomseed(seed)
+	-- print("setting new seed: " .. self)
+	generator:randomseed(self)
+end
+
+local rs = generator:randomseed()
+math.randomseed = function (x)
+	-- print("using math.randomseed " .. x)
+	rs(x)
+end
+
+function Maf:random(v)
+	local x = 0;
+	if self == nil then
+		x = generator:random()
+		self = 1;
+	else
+		x = generator:random(self)
+	end
+	-- print("random index: " .. self .. " value: " .. x)
+	return x
+end
+
+function GetItem(name) 
 	for i, item in ipairs(items) do
 		if name == item[name] then
 			return item
@@ -67,7 +98,7 @@ function ReplaceItem(item, replaced_item)
 		for index, planet in ipairs(planets) do
 			if InArray(planet.items, item) then
 				if replaced_item >= 0x30 then
-					print("YO WTF I'M WRITING ILLEGAL ITEM " .. replaced_item .. " TO VENDOR ITEM " .. item)
+					--print("YO WTF I'M WRITING ILLEGAL ITEM " .. replaced_item .. " TO VENDOR ITEM " .. item)
 				end
 
 				Ratchetron:WriteMemory(GAME_PID, 0x737bf0 + (planet.id * 4), 4, inttobytes(replaced_item, 4))
@@ -96,7 +127,7 @@ end
 -- Shuffle table
 function shuffle(tbl)
   for i = #tbl, 2, -1 do
-    local j = math.random(i)
+    local j = Maf.random(i)
     tbl[i], tbl[j] = tbl[j], tbl[i]
   end
 end
@@ -107,9 +138,9 @@ function GetItemWithID(id)
 			return item
 		end
 	end
-
-	print("Couldn't find item: " .. id)
-
+	
+	--print("Couldn't find item: " .. id)
+	
 	return -1
 end
 
@@ -120,9 +151,9 @@ function RemoveItem(tbl, id)
 			return
 		end
 	end
-
-	print("Couldn't find item: " .. id)
-
+	
+	--print("Couldn't find item: " .. id)
+	
 	return -1
 end
 
@@ -151,8 +182,8 @@ end
 
 
 function Randomize(seed)
-	math.randomseed(seed)
-
+	Maf.randomseed(seed)
+	
 	-- GraphViz file for debugging purposes. Use something like https://dreampuf.github.io/GraphvizOnline/ to view the graph.
 	file = io.open('randomizer_graph.dot', 'w')
 	filewrite("digraph {\n")
@@ -180,8 +211,7 @@ function Randomize(seed)
 
 		::continue_planet_search::
 		while found_planet == nil do
-			planet_index = math.ceil(math.random() * #available_planets)
-
+			planet_index = math.ceil(Maf.random() * #available_planets)
 			local working_planet = available_planets[planet_index]
 
 			-- If we only have 1 available out, we need to select a planet with at least 1 infobot, otherwise we're stuck in a dead end.
@@ -284,7 +314,7 @@ function Randomize(seed)
 						n_requirements = n_requirements + 1
 
 						if #item.req_items > 0 then
-							for k, req in ipairs(item.req_items[math.ceil(math.random() * #item.req_items)]) do
+							for k, req in ipairs(item.req_items[math.ceil(Maf.random() * #item.req_items)]) do
 								local has_requirement = false
 								for l, available_item in pairs(item_list) do
 									if item.id == available_item then
@@ -358,7 +388,7 @@ function Randomize(seed)
 						n_requirements = n_requirements + 1
 
 						if #item.req_items > 0 then
-							for k, req in ipairs(item.req_items[math.ceil(math.random() * #item.req_items)]) do
+							for k, req in ipairs(item.req_items[math.ceil(Maf.random() * #item.req_items)]) do
 								local has_requirement = false
 								for l, available_item in pairs(item_list) do
 									if item.id == available_item then
@@ -404,8 +434,8 @@ function Randomize(seed)
 								goto continue_requirement_search
 							end
 						end
-
-						local item_slot_id = math.ceil(math.random() * #available_item_slots)
+						
+						local item_slot_id = math.ceil(Maf.random() * #available_item_slots)
 						local item_slot = available_item_slots[item_slot_id]
 
 						-- Check if this item slot has any illegal item replacements
@@ -424,7 +454,7 @@ function Randomize(seed)
 						-- It's still possible, this just does a reroll.
 						if #available_item_slots > 1 and planets[available_outs[out_index].planet].id == item_slot.planet then
 							filewrite("# Trying to pick a different item slot\n")
-							item_slot_id = math.ceil(math.random() * #available_item_slots)
+							item_slot_id = math.ceil(Maf.random() * #available_item_slots)
 							item_slot = available_item_slots[item_slot_id]
 						elseif planets[available_outs[out_index].planet].id == item_slot.planet then
 							filewrite("# Putting item on same planet as its requirement because only " .. #available_item_slots .. " were available.\n")
@@ -486,8 +516,9 @@ function Randomize(seed)
 							table.remove(requirements_left, 1)
 							requirements_left[#requirements_left + 1] = req
 						else
-							local required_items = item_slot.item.req_items[math.ceil(math.random() * #item_slot.item.req_items)]
-
+						
+							local required_items = item_slot.item.req_items[math.ceil(Maf.random() * #item_slot.item.req_items)]
+							
 							if n_requirements < n_max_item_slots_needed then
 								-- Find smallest item requirement combinations
 								local item_requirement_combinations = item_slot.item.req_items
@@ -557,7 +588,7 @@ function Randomize(seed)
 
 		--print("out_index: " .. out_index)
 		--for i, out in pairs(available_outs) do
-		--	print(i .. ": " .. out.planet .. " : " .. out.infobot.id)
+		-- 	--print(i .. ": " .. out.planet .. " : " .. out.infobot.id)
 		--end
 
 		--print(available_outs[out_index].infobot.id .. " -> " .. found_planet.id)
@@ -628,23 +659,34 @@ function Randomize(seed)
 	end
 
 	if #remaining_items > 0 then
-		print("*************** Yo why are there " .. #remaining_items .. " items still not placed?")
+		--print("*************** Yo why are there " .. #remaining_items .. " items still not placed?")
 	end
 
 	filewrite("}\n")
 	file:close()
 
+	-- Print gunk to the console for racers.
+	local trash = ""									-- put a sequence of numbers into a string according to key and value pairs in randomized tables
+	local cursor = item_list[29]+10						-- select only a few numbers from this string using the last value read in the item list
+	for k,v in ipairs(planet_list) do
+			trash = trash..(k*v)
+	end
+	for k,v in pairs(item_list) do
+		trash = trash..(k*v)
+	end
+	print("Race Code: "..trash:sub(cursor,cursor+5)) 	-- im not much of a math person but the odds here are probably fine
+	
 	-- Apply planet and gadget/item replacements
-	for i=1,18 do
-		Ratchetron:WriteMemory(GAME_PID, 0xB00000 + i, 1, inttobytes(planet_list[i], 1))
-
-		PlanetSpecificFix(i, planet_list[i])
-	end
-
-	for id, replacement in pairs(item_list) do
-		ReplaceItem(id, replacement)
-	end
-
+	-- for i=1,18 do
+	-- 	Ratchetron:WriteMemory(GAME_PID, 0xB00000 + i, 1, inttobytes(planet_list[i], 1))
+		
+	-- 	PlanetSpecificFix(i, planet_list[i])
+	-- end
+	
+	-- for id, replacement in pairs(item_list) do
+	-- 	ReplaceItem(id, replacement)
+	-- end
+	
 	return 1
 end
 
@@ -652,40 +694,38 @@ function trim1(s)
    return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
-function OnLoad()
+-- function OnLoad()
 	-- Clear any previous randomizer data
-	memset(0xb00000, 0, 0x300)
-
+	-- memset(0xb00000, 0, 0x300)
+	
 	local seed = os.time()
 
-	local seed_file = io.open("seed.txt", "r")
-	if seed_file ~= nil then
-		local seed_text = seed_file:read("*a*")
+	-- check config file for seed
+	if config.seed ~= "none" and type(config.seed) == "string" then
+		seed = LibDeflate:Crc32(trim1(config.seed))
+	end
 
-		seed = LibDeflate:Crc32(trim1(seed_text), 0)
-
-		if string.find(seed_text:gsub("%s+", ""), "#graph:false") then
-			write_debug_graph = false
-		end
-
-		seed_file:close()
+	-- check config file for graph setting
+	if config.graph == false then
+		write_debug_graph = false
 	end
 
 	-- Repeatedly generate new path until it works. Bad code makes generation hard
 	while Randomize(seed) <= 0 do
-		--print("")
-		--print("-----------------")
-		--print("-----------------")  -- Just print a bunch of newlines so it's easy to distinguish attempts in the console
-		--print("")
+		-- print(seed)
+		-- print("")
+		-- print("-----------------")
+		-- print("-----------------")  -- Just print a bunch of newlines so it's easy to distinguish attempts in the console
+		-- print("")
 		seed = seed + 1
 	end
 
 	print("* Done!")
-
-	if (game.planet == 0) then
-		game:loadPlanet(0)
-	end
-end
+	
+	-- if (game.planet == 0) then
+	-- 	game:loadPlanet(0)
+	-- end
+-- end
 
 function OnTick(ticks)
 
